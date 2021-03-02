@@ -15,6 +15,18 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer meta.Logout()
+	// defer meta.Logout()
 	fmt.Println(meta)
+
+	sessions, err := meta.SessionList()
+	if err != nil {
+		log.Panicln(err)
+	}
+	fmt.Println("Sessions :")
+	fmt.Println(len(sessions))
+	for _, session := range sessions {
+		fmt.Printf("%+v\n", session)
+		fmt.Println("=====")
+	}
+	meta.Version()
 }

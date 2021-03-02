@@ -36,6 +36,17 @@ type logoutReq struct {
 	LogoutToken string
 }
 
+type versionReq struct {
+	_msgpack struct{} `msgpack:",asArray"`
+	Method   string
+	Token    string
+}
+
+type versionRes struct {
+	Version string `msgpack:"version"`
+	Ruby    string `msgpack:"ruby"`
+}
+
 type logoutRes struct {
 	Result string `msgpack:"result"`
 }
@@ -87,9 +98,9 @@ func (meta *Metaspoilt) send(req interface{}, res interface{}) error {
 	}
 	defer r.Body.Close()
 	if err := msgpack.NewDecoder(r.Body).Decode(&res); err != nil {
-		fmt.Print(err)
 		return err
 	}
+	fmt.Printf("%+v\n", res)
 	return nil
 }
 
@@ -103,7 +114,6 @@ func (meta *Metaspoilt) Login() error {
 	if err := meta.send(ctx, &res); err != nil {
 		return err
 	}
-	fmt.Printf("%+v\n", res)
 	meta.token = res.Token
 	return nil
 }
@@ -120,4 +130,33 @@ func (meta *Metaspoilt) Logout() error {
 	}
 	meta.token = ""
 	return nil
+}
+
+func (meta *Metaspoilt) Version() error {
+	ctx := &versionReq{
+		Method: "core.version",
+		Token:  meta.token,
+	}
+
+	var res versionRes
+	if err := meta.send(ctx, &res); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (meta *Metaspoilt) SessionList() (map[uint32]SessionListResponse, error) {
+	req := &sessionListReq{
+		Method: "session.list",
+		Token:  meta.token,
+	}
+	res := make(map[uint32]SessionListResponse)
+	if err := meta.send(req, &res); err != nil {
+		return nil, err
+	}
+	for i, session := range res {
+		session.ID = i
+		res[i] = session
+	}
+	return res, nil
 }
