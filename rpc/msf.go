@@ -107,3 +107,17 @@ func (meta *Metaspoilt) Login() error {
 	meta.token = res.Token
 	return nil
 }
+
+func (meta *Metaspoilt) Logout() error {
+	ctx := &logoutReq{
+		Method:      "auth.logout",
+		Token:       meta.token,
+		LogoutToken: meta.token,
+	}
+	var res logoutRes
+	if err := meta.send(ctx, &res); err != nil {
+		return err
+	}
+	meta.token = ""
+	return nil
+}

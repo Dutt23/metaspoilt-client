@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"metaspoilt-minimal/rpc"
+	"log"
+	"metaspoilt-client/rpc"
 	"os"
 )
 
@@ -11,6 +12,9 @@ func main() {
 	pass := os.Getenv("MSFPASS")
 	user := "msf"
 	meta, err := rpc.New(host, user, pass)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer meta.Logout()
 	fmt.Println(meta)
-	fmt.Println(err)
 }
